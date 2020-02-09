@@ -24,7 +24,6 @@ SELECT first_name+last_name AS "姓 名"
 FROM employees;
 
 /*
-
 Java中+的作用：
 1、加法运算
 两边都是数值时可以实现加法运算
@@ -51,7 +50,6 @@ null+null===>null
 null+100===>null
 
 因此上述需求无法实现，两个字符型无法转换为数值型
-
 */
 
 ##方案2：使用concat拼接函数(千万注意分号需要用英文状态下半角，否则容易报错)
