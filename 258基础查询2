@@ -1,0 +1,68 @@
+#六、查询函数（调用函数，获取返回值）
+SELECT DATABASE();
+SELECT VERSION();
+SELECT USER();
+
+#七、起别名
+#方式一：使用as关键字——关键字可以不用或者用双引号、单引号表着重突出;
+SELECT USER() AS 用户名;
+SELECT USER() AS "用户名";
+SELECT USER() AS ‘用户名’;
+##当需要显示的关键字包含空格等SQL无法理解的语句，便一定需要加“”或‘’,如
+SELECT last_name AS "姓 名" FROM employees;
+
+#方式二：使用空格
+SELECT USER()   用户名;
+SELECT USER()   "用户名";
+SELECT USER()   ‘用户名’;
+##从开发角度用空格比较快，但从语义性上用as会比较好
+
+#八、需求：查询 first_name 和 last_name拼接成全名，最终起别民为：姓 名
+
+##方案1：使用+ passx
+SELECT first_name+last_name AS "姓 名"
+FROM employees;
+
+/*
+
+Java中+的作用：
+1、加法运算
+两边都是数值时可以实现加法运算
+100+1.5===>101.5
+'a'+2===>99
+1.3+'2'===>51.3  ‘2’的字符是50
+
+2、拼接符
+至少有一个操作数为字符串
+“hello”+100===>“hello100”
+“hello”+“a”===>“helloa”
+
+mySQL中+的作用：
+1.加法运算
+①两个操作数都是数值型
+100+1.5===>101.5
+
+②其中一个操作数字为字符型
+将字符型数据强制转换成数值型，如果无法转换，则直接当作0处理
+‘张无忌’+100===>100
+
+③其中一个操作数是null
+null+null===>null
+null+100===>null
+
+因此上述需求无法实现，两个字符型无法转换为数值型
+
+*/
+
+##方案2：使用concat拼接函数(千万注意分号需要用英文状态下半角，否则容易报错)
+SELECT CONCAT(first_name,last_name) AS "姓 名"
+FROM employees;
+
+#九、dietinct的使用 需求：查询员工涉及到的部门编号有哪些
+
+SELECT `department_id` FROM employees;
+SELECT DISTINCT`department_id` FROM employees;
+
+#十、查看表结构
+DESC employees;
+SHOW COLUMNS FROM employees;
