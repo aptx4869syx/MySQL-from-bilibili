@@ -1,0 +1,46 @@
+#进阶一：基础查询
+/*
+语法：
+select 查询列表 from；
+
+特点：
+1.查询的结果集 是一个虚拟表；
+2.select类似于system.out.println(打印内容)；
+
+select后面跟的查询列表，可以有多个部分组成，中间用逗号隔开
+例如：select 字段1，字段2，表达式 from 表；
+
+System.out.println()的打印内容只能有一个。
+
+3.执行顺序
+①from子句
+②select子句
+
+4.查询列表可以是：字段、表达式、常量、函数等
+*/
+#一、询常量
+SELECT 100；
+#二、查询表达式
+SELECT 100*3；
+#三、查询单个字段_
+##可以双击左侧具体表或字段避免打字
+##双击出来的字段会加着重号""
+SELECT last_name FROM employees;
+#四、查询多个字段
+##注意逗号需要半角英文格式
+SELECT `last_name`,`email`,`job_id` FROM employees;
+#五、查询所有字段
+##缺点是这样显示顺序就按照表原来顺序显示
+##并且语义性没有全部打出来好
+SELECT * FROM employees;
+
+#小技巧——选中代码按F12快捷键对齐格式，如下语义更为明确
+#小技巧——选中代码按F9快速执行或按左上角图形按钮执行
+ SELECT
+  last_name,
+  first_name,
+  commission_pct,
+  hiredate,
+  salary
+FROM
+  employees;
