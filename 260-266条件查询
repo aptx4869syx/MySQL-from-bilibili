@@ -1,0 +1,200 @@
+#进阶二：条件查询
+/*
+语法：
+
+select 查询列表
+from 表名
+where 筛选条件;
+
+where类似java中的if
+执行顺序：
+①from子句
+②where子句
+③select子句
+
+例如：
+select last_name, first_name from employees where salary>20000;
+
+特点：
+1、按关系表达式筛选
+关系运算符：>小于   <大于   >=大于等于   <=小于等于   =等于   !=不等于(java中的,不推荐)   <>不等于(推荐)   
+
+2、按逻辑表达式筛选
+逻辑运算符
+(java中的,不推荐)&&与   ||或   !非
+(SQL中的,推荐)and与   or或   not非
+如果不加括号，条件运算按照NOT、AND、OR的优先级进行，
+即NOT优先级最高，其次是AND，最后是OR。加上括号可以改变优先级。
+
+3、模糊查询_SQL特有
+like
+in
+between and
+is null
+
+
+*/
+SELECT last_name, first_name FROM employees WHERE salary>20000;
+#一、按关系表达式筛选
+#案例1：查询部门编号不是100的员工信息
+#员工信息不明确，应该用*查询所有员工信息
+SELECT * FROM employees WHERE department_id <>100;
+
+#案例2：查询工资<15000的姓名、工资
+SELECT first_name, last_name, salary 
+FROM employees
+WHERE salary<15000;
+
+#二、按逻辑表达式筛选
+#案例1：查询部门编号不是50-100之间员工姓名、部门编号、邮箱
+#方式1：
+SELECT first_name, last_name, department_id, email 
+FROM employees
+WHERE department_id<50 OR department_id>100;
+
+#方式2：语义性更加明确
+SELECT first_name, last_name, department_id, email 
+FROM employees
+WHERE NOT(department_id>=50 AND department_id<=100);
+
+#案例2：查询奖金率>0.03 或者 员工编号在60-110之间的员工信息
+SELECT *
+FROM employees
+WHERE `commission_pct`>0.03 OR (employee_id>=60 AND employee_id<=110);
+#不知道优先级时加小括号提前绝对没错！
+
+#三、模糊查询
+#1、like语句
+/*
+一般和通配符搭配使用，对字符型数据进行部分匹配查询
+
+#此处补充整型、实型、字符型常量的
+
+常见的通配符：
+_任意单个字符
+%任意多个字符
+
+like ‘常量值’;
+not like '常量值’；
+*/
+#案例1：查询姓名中包含字符a的员工信息
+SELECT *
+FROM employees
+WHERE last_name LIKE '%a%';
+
+#案例2：查询姓名中最后一个字符为a的员工信息
+SELECT *
+FROM employees
+WHERE last_name LIKE '%a';
+
+#案例3：查询姓名中第一个字符为a的员工信息
+SELECT *
+FROM employees
+WHERE last_name LIKE 'a%';
+
+#案例4：查询姓名中第三个字符为x的员工信息
+SELECT *
+FROM employees
+WHERE last_name LIKE '__x%';
+#注意第三个字符为x，前面两个应该是_,后面还需要加一个%
+
+#案例5：查询姓名中第二个字符为_的员工信息
+SELECT *
+FROM employees
+WHERE last_name LIKE '_\_%';
+/*
+此题难点在于需要让程序了解下划线并非通配符而是下划线，因此需要转义字符；
+
+##转义字符是很多程序语言、数据格式和通信协议的形式文法的一部分。
+对于一个给定的字母表，一个转义字符的目的是开始一个字符序列，
+使得转义字符开头的该字符序列具有不同于该字符序列单独出现时的语义。
+因此转义字符开头的字符序列被叫做转义序列，转义序列通常有两种功能：
+第一个是编码一个句法上的实体，如设备命令或者无法被字母表直接表示的特殊数据。
+第二种功能，也叫字符引用，用于表示无法在当前上下文中被键盘录入的字符（如字符串中的回车符），
+或者在当前上下文中会有不期望的含义的字符（如C语言字符串中的双引号字符"，不能直接出现，必须用转义序列表示）。
+在后面那种情况，转义序列是一种由转义字符自身和一个被引用的字符组成的一个二合字母（digraph）情形。
+
+\是转义字符，是java和C中的语法，SQL可以兼容，但是并不推荐；
+实际在SQL中有特有语法，可以自定义转义符号如下，并加escape语句：
+*/
+SELECT *
+FROM employees
+WHERE last_name LIKE '_$_%' ESCAPE '$';
+#$可以换成其他比如_之类，但会缺乏语义性
+
+#2、in语句
+/*
+功能：查询某字段的值是否属于指定的列表之内
+a in(常量值1,常量值2,常量值3,...)
+a not in(常量值1,常量值2,常量值3,...)
+
+*/
+
+#案例1：查询部门编号是30/50/90的员工名、部门编号
+SELECT `last_name`,`department_id`
+FROM employees
+WHERE `department_id` IN(30,50,90);
+
+#这个案例采用逻辑表达式同样可以实现,但显然用in更为简洁
+SELECT `last_name`,`department_id`
+FROM employees
+WHERE `department_id`=30 OR `department_id`=50 OR `department_id`=90;
+
+#案例2：查询工种编号不是SH_CLERK或IT_PROG的员工信息
+SELECT *
+FROM employees
+WHERE `job_id` NOT IN(SH_CLERK,IT_PROG);
+#注意，上面这句有问题，这里SH_CLERK和IT_PROG需要用‘’表示字符型常量，否则无法识别；
+#在SQL中数值型的常量值不用单引号，非数值型的常量值都需要用单引号;
+#千万注意中英文状态下的单引号非常像，但不一样中文‘’，英文'';
+#方式1：
+SELECT *
+FROM employees
+WHERE `job_id` NOT IN('SH_CLERK','IT_PROG');
+#方式2：
+SELECT *
+FROM `employees`
+WHERE NOT(`job_id`= 'SH_CLERK' OR `job_id`= 'IT_PROG');
+
+#3、between and
+/*
+功能：判断一个区间值(注意此处默认含头尾)
+
+between and/not between and
+
+*/
+
+#案例1：查询部门编号是30-90之间的部门编号、员工姓名
+#方式1：
+SELECT department_id,last_name
+FROM employees
+WHERE `department_id` BETWEEN 30 AND 90;
+#注意30和90的顺序不能颠倒
+#方式2：
+SELECT department_id,last_name
+FROM employees
+WHERE `department_id`>=30 AND `department_id`<=90;
+
+#案例2：查询年薪不是100000-200000之间的员工姓名、工资、年薪；
+SELECT last_name, salary, salary*12*(1+`commission_pct`)
+FROM employees
+WHERE salary*12*(1+`commission_pct`) NOT BETWEEN 100000 AND 200000;
+#注意上面的语句有问题，因为`commission_pct`可能为空，这样会出现null值，因此此语句要改
+SELECT last_name, salary, salary*12*(1+IFNULL(`commission_pct`,0)) AS '年薪'
+FROM employees
+WHERE salary*12*(1+`commission_pct`) NOT BETWEEN 100000 AND 200000;
+
+#4、is nul/is not null
+/*
+注意null值无法用=表示is，=只能判断普通内容，is只能判断null值
+<=>安全等于，既能判断普通内容，又能判断null值，但这个符号的语义性太差，比较难看懂
+*/
+#案例1：查询没有奖金的员工信息
+SELECT *
+FROM `employees`
+WHERE `commission_pct`IS NULL;
+
+#案例2：查询有奖金的员工信息
+SELECT *
+FROM `employees`
+WHERE `commission_pct`IS NOT NULL;
