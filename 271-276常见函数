@@ -1,0 +1,222 @@
+#进阶4：常见函数
+ /*
+函数：类似java中学过的“方法”，
+为了解决某个问题，将编写一系列的命令集合封装在一起，对外仅仅暴露方法名，供外部调用
+
+1、自定义方法（函数）——在mySQL高级中讲解
+2、调用方法（函数）
+       叫什么：函数名
+       干什么：函数功能
+
+常见函数：
+        字符函数————专门处理字符串
+            concat
+            substr
+            length
+            char_length
+            upper
+            lower
+            trim
+            left
+            right
+            lpad
+            rpad
+            instr
+            strcmp
+        数学函数————专门处理数值型
+            abs
+            ceil
+            floor
+            truncate
+            mod
+        日期函数
+            CURDATE
+            CURTIME
+            NOW
+            DATEDIFF
+            DATE_FORMAT
+            STR_TO_DATE
+        流程控制函数
+            IF
+            CASE
+*/
+#一、字符函数
+ 1 、concat 拼接字符
+SELECT
+  CONCAT ('hello', first_name, last_name)
+FROM
+  employees;
+
+2、length 获取字节长度
+SELECT LENGTH('hello,郭襄');
+
+3、char_length 获取字符个数
+SELECT CHAR_LENGTH('hello,郭襄');
+
+4、substring 截取子串
+/*
+#substr(str,起始索引,截取的字符串长度)
+注意：SQL中起始索引从1开始，str指字符串
+#substr(str,起始索引)
+注意：不加字符串长度默认将后面的字符串全部截取
+注意：若截取的字符串长度超过字符串总长度也只会显示后面所有内容
+*/
+SELECT SUBSTR('张三丰爱上了郭襄',1,3);
+SELECT SUBSTR('张三丰爱上了郭襄',7,2);
+SELECT SUBSTR('张三丰爱上了郭襄',7);
+
+5、insert获取字符第一次出现的索引
+SELECT INSTR('三打白骨精aaa二打白骨精bbb白骨精','白骨精');
+
+6、trim去前后指定字符，默认去除空格
+SELECT TRIM('  虚 竹    ') AS a;
+SELECT TRIM('x' FROM 'xxxxx虚  竹xxxxxxxxxx') AS a;
+
+7、LPAD/RPAD 左填充/右填充
+#LPAD(str,列字符长度,填充值)
+SELECT LPAD('木婉清',10,'a');
+SELECT LPAD('木婉清',1,'a');
+
+8 、upper / LOWER 变大写 / 变小写 #案例1：查询员工表中姓名，要求格式：姓首字母大写，其它字符小写，名所有字符大写，且姓和名之间用_分割，最后起别名“OUT_PUT”
+ /*select
+  concat (Upper (substr (`last_name`, 1, 1)),
+  lower (SUBSTR (`last_name`, 2),
+  '_',
+  upper (SUBSTR (`first_name`, 1)) as "OUT_PUT" from `employees`;
+  */
+#上面的有问题，主要是有些函数的单括号没有写完整！正确如下：
+SELECT CONCAT (UPPER(SUBSTR(`last_name`,1,1)),LOWER(SUBSTR(`last_name`,2)),'_',UPPER(SUBSTR(`first_name`,1))) AS "OUT_PUT" 
+FROM employees;
+
+9、strcmp比较两个字符大小
+SELECT STRCMP('abc','aaa');
+#前面比后面大返回1，前面比后面小返回-1，前后一样返回0
+#比较逻辑是从高位到地位一个个字符比，转换为ASCII码大小进行比较
+
+10、LEFT/RIGHT 截取子串
+SELECT LEFT('鸠摩智',1);
+SELECT RIGHT('鸠摩智',1);
+
+
+#二、数学函数
+1、ABS绝对值
+SELECT ABS(-555);
+
+2、ceil向上取整 返回>=该参数的最小整数
+SELECT CEIL(1.09);===>2
+SELECT CEIL(-1.09);===>-1
+
+3、floor向下取整 返回<=该参数的最大整数
+SELECT CEIL(1.09);===>1
+SELECT CEIL(-1.09);===>-2
+
+4、round四舍五入 可以添加保留位数
+SELECT ROUND(1.872345);===>2
+SELECT ROUND(1.872345,2);===>1.87
+
+5、truncate强制截断 强制截取小数点后多少位，无四舍五入
+SELECT TRUNCATE(1.872345,3);===>1.872
+
+6、mod取余
+SELECT MOD(-10,3);
+SELECT -10%3;===>-1
+#-10%3=-10-(-10)/3*3=-1
+#通用公式，支持小数a%b=a-(int)a/b*b 
+#简单来说,先按绝对值取余，再根据被除数的符号决定余数符号
+SELECT 10%3;===>1
+SELECT -10%-3;===>-1
+SELECT 10%-3;===>1
+
+7、rand随机数 返回0~1之间的随机值
+
+8、sqrt求平方根
+
+9、pow返回次方
+SELECT POWER(3,2);===>9
+
+#三、日期函数
+1、NOW获取当前日期
+SELECT NOW();
+
+2、CURDATE返回当前日期 也可以写成CURRENT_DATE()
+
+3、CURTIME返回当前时间 也可以写成CURRENT_TIME()
+
+4、DATEDIFF(date1,date2)返回date1-date2的日期间隔 
+SELECT DATEDIFF('1998-7-16','2019-7-13');
+SELECT DATEDIFF('2020-2-13','2019-7-13');
+
+5、TIMEDIFF(time1,time2)返回time1-times2的时间间隔
+
+6、DATE_FORMAT(DATETIME,fmt)按照字符串fmt格式化日期datetime
+SELECT DATE_FORMAT('1998-7-16','%Y年%M月%d日%H小时%i分钟%s秒') AS "出生日期";
+
+7、STR_TO_DATE按指定格式解析字符串为日期类型
+SELECT * FROM employees
+WHERE hiredate<STR_TO_DATE('3/15 1998','%m/%d %Y');
+
+#四、流程控制函数
+1、IF(VALUE,t,f) 如果value是真，返回t，否则返回f
+SELECT IF(100>9,'好','坏');
+
+#需求：如果有奖金，则显示最终奖金，如果没有则显示0
+SELECT IF(`commission_pct` IS NOT NULL,salary*12*`commission_pct`,0)
+FROM employees;
+
+2 、CASE函数
+/*
+①情况1：类似于switch语句，可以实现等值判断
+CASE 表达式
+WHEN 值1 THEN 结果1
+WHEN 值2 THEN 结果2
+...
+ELSE 结果n
+END
+
+#案例：
+部门编号是30，工资显示为2倍
+部门编号是50，工资显示为3倍
+部门编号是60，工资显示为4倍
+否则不变
+显示部门编号，新工资，旧工资
+
+SELECT department_id,salary as "旧工资",
+CASE department_id
+WHEN 30 THEN salary*2
+WHEN 40 THEN salary*3
+WHEN 50 THEN salary*4
+ELSE salary
+END as "新工资"
+FROM employees;
+
+②情况2：类似多重if语句，实现区间判断else可省略
+CASE 
+WHEN 条件1 THEN 结果1
+WHEN 条件2 THEN 结果2
+...
+ELSE 结果n
+END
+
+#案例：如果工资>20000，显示级别A
+       工资>15000，显示级别B
+       工资>10000，显示级别C
+       否则显示D 
+select salary,
+case 
+when salary>20000 then A
+when salary>15000 and salary<=20000 then B
+when salary>10000 and salary<=15000 then C
+else D as "薪酬级别"
+end
+from employees;
+
+#上面这段代码错误有：ABCD为字符常量，需要加单引号，as别名位置不对，应该在end后面
+SELECT salary,
+CASE 
+WHEN salary>20000 THEN 'A'
+WHEN (salary>15000 AND salary<=20000) THEN 'B'
+WHEN (salary>10000 AND salary<=15000) THEN 'C'
+ELSE 'D' 
+END AS "薪酬级别"
+FROM employees;
+*/
