@@ -1,0 +1,153 @@
+#进阶5：分组函数
+ /*
+说明：分组函数往往用于实现将一组数据进行统计计算，最终得到一个值，又称为绝活函数或统计函数
+
+分组函数清单：
+sum(字段名)：求和
+avg(字段名)：求平均值
+max(字段名)：求最大值
+min(字段名)：求最小值
+count(字段名)：计算非空字段值的个数
+*/
+#案例1：查询员工信息表中，所有员工的工资和、工资平均值、最低工资、最高工资、有工资的个数
+SELECT
+  SUM(salary) "工资和",
+  AVG(salary) "平均工资",
+  MIN(salary) "最低工资",
+  MAX(salary) "最高工资",
+  COUNT(salary) "发放工资人数"
+FROM
+  employees;
+
+#案例2：添加筛选条件
+        #①查询emp表中记录数
+        SELECT COUNT(last_name) FROM employees;
+        
+        #②查询emp表中有工资的人数
+        SELECT COUNT(salary) FROM employees;
+        
+        #③查询emp表中月薪大于2500的人数
+        SELECT COUNT(salary>2500) FROM employees;
+        #这种表达错误，需要采用如下逻辑
+        SELECT COUNT(salary) FROM employees WHERE salary>2500;
+
+#count的补充介绍#
+#1、统计表行数，推荐使用count(*)
+#①用于查询整个表/结果集的所有有效行数，加where就是在筛选范围内的总有效行数；
+SELECT COUNT(*) FROM employees;
+SELECT COUNT(*) FROM employees WHERE department_id=30;
+#1是一个常量1，相当于在表中新加常量列，再计数，和*的作用一样，加其他所有常量都可以
+SELECT COUNT(1) FROM employees;    
+  
+#2、搭配distinct实现去重的统计
+#需求：查询有员工的部门个数，max，sum这几个函数都可以搭配使用
+SELECT COUNT(DISTINCT department_id) FROM employees;
+  
+#思考：每个部门的总工资，平均工资如何求
+SELECT SUM(salary) FROM employees WHERE department_id=30;
+SELECT SUM(salary) FROM employees WHERE department_id=40;
+...
+#由分组查询实现：
+#先分组，再统计，所以分组函数一般搭配统计函数使用 由grooup by子句实现
+SELECT department_id,SUM(salary) FROM employees GROUP BY department_id;
+#注意这里只能查询分组字段，不能查询其他字段，没有意义
+  
+ #进阶6、分组查询
+ /*
+语法：
+select 查询列表
+from 表名
+where 分组前筛选
+group by 分组列表
+having 分组后筛选
+order by 排序列表;
+
+执行顺序：
+①from子句
+②where子句
+③having子句
+④group by子句
+⑤select子句
+⑥order by子句
+
+特点：
+①查询列表往往是 分组函数和被分组的字段；
+②分组查询中的筛选分两类
+              筛选的基表    使用的关键词     位置
+分组前筛选    原始表        where            group by前            
+分组后筛选    临时表        having           group by后
+where——group by——having
+
+问题：分组函数做条件 一般用having连接 不可能用where 
+ */
+
+#1）简单的分组 
+#案例1：查询每个工种的员工平均工资
+SELECT AVG(salary),job_id
+FROM employees
+GROUP BY job_id;
+
+#案例2：查询每个领导的手下人数
+SELECT COUNT(*),manager_id
+FROM employees
+WHERE manager_id IS NOT NULL
+GROUP BY manager_id;
+
+#2）可以实现分组前的筛选
+#案例1：查询优先中包含a字符的 每个部门的最高工资
+SELECT MAX(salary),department_id
+FROM employees
+WHERE email LIKE('%a%') AND department_id IS NOT NULL
+GROUP BY department_id;
+
+#案例2：查询每个领导手下有奖金的员工的平均工资
+SELECT AVG(salary) "平均工资",manager_id
+FROM employees
+WHERE commission_pct IS NOT NULL
+GROUP BY manager_id;
+
+#3）可以实现分组后的筛选
+#案例1：查询那个部门的员工数大于5
+#分析1：查询每个部门的员工个数
+SELECT COUNT(*) "员工个数",department_id
+FROM employees
+GROUP BY department_id;
+#分析2：在刚才结果的基础上，筛选那个部门的员工个数>5
+SELECT COUNT(*) "员工个数",department_id
+FROM employees
+GROUP BY department_id
+HAVING COUNT(*)>5 
+#分组后筛选只能用having不能用where
+
+#案例2：每个工种有奖金的员工的最高工资>12000的工种编号和最高工资
+SELECT job_id,MAX(salary) 最高工资
+FROM employees
+WHERE `commission_pct` IS NOT NULL
+GROUP BY job_id
+HAVING 最高工资>12000;
+
+#案例3：领导编号>102的每个领导手下的最低工资大于5000的领导编号和最低工资
+SELECT manager_id,MIN(salary) 最低工资
+FROM employees
+WHERE manager_id>102
+GROUP BY manager_id
+HAVING 最低工资>5000;
+
+#4）可以实现排序
+#案例1：查询每个工种无奖金的员工的最高工资>6000的工种编号和最高工资，按最高工资升序
+SELECT MAX(salary) AS 最高工资,job_id 
+FROM employees
+WHERE `commission_pct` IS NULL
+GROUP BY job_id
+HAVING 最高工资>6000
+ORDER BY 最高工资 ASC;
+
+#5）按多个字段分组 用逗号隔开多个字段，这多个字段值完全一样才是一组
+#案例1：查询每个工种每个部门的最低工资，并按最低工资降序
+#工种部门完全一样才是一组
+SELECT MIN(salary) 最低工资,job_id,department_id
+FROM employees
+GROUP BY job_id,department_id
+ORDER BY 最低工资 DESC;
+
+  
