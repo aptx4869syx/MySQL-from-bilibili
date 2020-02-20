@@ -1,0 +1,192 @@
+#进阶6：连接查询
+/*
+含义：又称多表查询，当查询的字段来自多个表时，就会用到连接查询
+笛卡尔乘积现象：表1有m行，表2有n行，结果=m*n行
+
+发生原因：当查询多个表时，没有有效的连接条件
+如何避免：添加有效的连接条件
+
+分类：
+    按年代分类：
+        sql92标准：仅仅支持内连接，mySQL完全不支持外连接
+        sql99标准【推荐】：MySQL中支持内连接+外连接（左外和右外）+交叉连接
+    按功能分类：
+        内连接：
+            等值连接
+            非等值连接
+            自连接
+        外连接：
+            左外连接
+            右外连接
+            全外连接
+        交叉连接    
+
+*/
+
+#引入案例：查询女神和对应的男神名
+SELECT 'name','boyName'
+FROM beauty,boys
+WHERE beauty.boyfriend_id=boys.id; 
+
+#-------------------------------------------SQL92语法-------------------------------------------
+#一、内连接
+#一）等值连接
+/*
+语法：
+    select 查询列表
+    from 表名1 as 别名1,表名2 as "别名2",...
+    where 等值连接的连接条件
+    【and 筛选条件】
+    【group by 字段分组】
+    【having 分组后的筛选】
+    【order by 字段排序】
+
+数学解释：
+连接实际采用笛卡尔乘积，但为了避免产生笛卡尔集造成数据冗余，我们一般都会加where作为连接条件
+这也是关系型数据库的特点，一般库和库之间可以找到关联关系，同时再加上筛选条件就可以极大简化总表
+    
+特点：
+    1、为了去解决多表中字段名重名的问题，往往为表起别名，提高语义性
+    2、多表的顺序无要求
+    3、多表等值连接的结果为多表的交集部分
+    4、n表连接，至少需要n-1个连接条件
+    5、一般需要为表起别名，特别是自连接时
+    6、可以搭配前面介绍的所有子句使用，比如排序、分组、筛选
+
+*/
+
+#①简单的两表连接
+#案例1：查询员工名和部门名
+SELECT last_name,department_name
+FROM employees e,departments d
+WHERE e.department_id=d.`department_id`;
+/*
+注意：一旦起别名，无法再用表名限定select，可以用别名限定select
+WRONG
+SELECT employees.last_name,departments.department_name
+FROM employees e,departments d
+WHERE e.department_id=d.`department_id`;
+RIGHT
+SELECT e.last_name,d.department_name
+FROM employees e,departments d
+WHERE e.department_id=d.`department_id`;
+*/
+
+#②添加筛选条件
+#案例1：查询部门编号>100的部门名和所在的城市名
+SELECT department_id,city
+FROM `departments` d,`locations` l
+WHERE d.`location_id`=l.`location_id` 
+AND d.department_id>100;
+
+#案例2：查询有奖金的员工名、部门名
+SELECT last_name,department_name
+FROM employees e,departments d
+WHERE e.`department_id`=d.`department_id`
+AND e.`commission_pct` IS NOT NULL;
+#where后面的两个筛选可以调换位置，不影响结果，但可能影响速度
+SELECT last_name,department_name
+FROM employees e,departments d
+WHERE e.`commission_pct` IS NOT NULL
+AND e.`department_id`=d.`department_id`;
+
+#案例3：查询城市名中第二个字符为o的部门名和城市名
+SELECT city,department_name
+FROM locations l,departments d
+WHERE l.`location_id`=d.`location_id`
+AND l.`city` LIKE '_o%';
+
+#③添加分组+筛选
+#案例1：查询每个城市的部门个数
+#分析1：先查询每个城市的部门信息 首先把两张表连接成一张表
+/*
+类似于先进行了以下操作
+SELECT d.*,l.*
+FROM departments d,locations l
+WHERE d.`location_id`=l.`location_id`;
+*/
+SELECT d.department_id,city
+FROM departments d,locations l
+WHERE d.`location_id`=l.`location_id`;
+#分析2：统计同一城市的部门个数 COUNT(d.department_id)可以用COUNT(*)代替
+SELECT COUNT(d.department_id) AS 部门个数,city
+FROM departments d,locations l
+WHERE d.`location_id`=l.`location_id`
+GROUP BY city;
+
+#案例2：查询有奖金的每个部门的部门名和部门的领导编号和该部门的最低工资
+SELECT d.department_name,e.manager_id,MIN(salary)
+FROM employees e,departments d
+WHERE e.`department_id`=d.`department_id`
+AND commission_pct IS NOT NULL
+GROUP BY department_name;
+#分析：上面一句话的意思是无奖金的领导 和部门最低工资 可以先尝试链接表后看效果
+SELECT d.department_name,e.last_name,e.manager_id,e.salary,e.commission_pct
+FROM employees e,departments d
+WHERE e.`department_id`=d.`department_id`
+AND commission_pct IS NOT NULL
+ORDER BY e.department_id,e.salary;
+
+#案例3：查询部门中员工个数>10的部门名
+SELECT d.department_name
+FROM departments d,employees e
+WHERE d.`department_id`=e.`department_id`
+GROUP BY e.`department_id`
+HAVING COUNT(*)>10;
+
+#④实现多表连接
+#案例1：查询员工名，部门名和所在城市
+SELECT e.last_name,d.department_name,l.city
+FROM employees e,departments d,locations l
+WHERE e.`department_id`=d.`department_id`
+AND d.`location_id`=l.`location_id`;
+#未加连接条件的笛卡尔集非常冗余
+SELECT d.department_name,l.city
+FROM departments d,locations l;
+
+#二）非等值连接
+/*
+语法：
+    select 查询列表
+    from 表名1 as 别名1,表名2 as "别名2",...
+    where 等值连接的连接条件
+    【and 筛选条件】
+    【group by 字段分组】
+    【having 分组后的筛选】
+    【order by 字段排序】
+    */
+    
+#案例1：查询员工的工资和工资级别
+SELECT salary,grade_level
+FROM employees e,job_grades g
+WHERE salary BETWEEN g.`lowest_sal` AND g.`highest_sal`;
+
+CREATE TABLE job_grades
+(grade_level VARCHAR(3),
+ lowest_sal  INT,
+ highest_sal INT);
+
+INSERT INTO job_grades
+VALUES ('A', 1000, 2999);
+
+INSERT INTO job_grades
+VALUES ('B', 3000, 5999);
+
+INSERT INTO job_grades
+VALUES('C', 6000, 9999);
+
+INSERT INTO job_grades
+VALUES('D', 10000, 14999);
+
+INSERT INTO job_grades
+VALUES('E', 15000, 24999);
+
+INSERT INTO job_grades
+VALUES('F', 25000, 40000);
+
+#三）自连接
+#相当于自己连接自己
+#案例：查询 员工名和上级的名称
+SELECT e.employee_id,e.last_name,l.employee_id,l.last_name
+FROM employees e,employees l
+WHERE e.`manager_id`=l.`employee_id`;
