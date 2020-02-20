@@ -10,35 +10,43 @@
 
 常见函数：
         字符函数————专门处理字符串
-            concat
-            substr
-            length
-            char_length
-            upper
-            lower
-            trim
-            left
-            right
-            lpad
-            rpad
-            instr
-            strcmp
+            concat 连接
+            substr 截取字串
+            length 获取字节长度
+            char_length 获取字符个数
+            upper 变大写
+            lower 变小写
+            trim 去前后空格
+            left 左截取
+            right 右截取
+            lpad 左填充
+            rpad 右填充
+            instr 获取子串第一次出现的索引
+            strcmp 比较两个字符大小
         数学函数————专门处理数值型
-            abs
-            ceil
-            floor
-            truncate
-            mod
+            abs 取绝对值
+            ceil 向上取整
+            floor 向下取整
+            truncate 截断
+            mod 取余
+            rand 随机数
         日期函数
-            CURDATE
-            CURTIME
-            NOW
-            DATEDIFF
-            DATE_FORMAT
-            STR_TO_DATE
+            CURDATE 当前日期
+            CURTIME 当前时间
+            NOW 当前日期和时间
+            YEAR 返回年
+            DATEDIFF 返回两个日期相差天数
+            DATE_FORMAT 将日期转换成字符
+            STR_TO_DATE 将字符转换成日期
+            MONTHNAME 以英文形式返回月
         流程控制函数
             IF
             CASE
+         其他函数
+            version 当前数据库服务器的版本
+            datebase 当前打开的数据库
+            user 当前用户
+            MD5('字符') 返回该字符的MD5加密形式 
 */
 #一、字符函数
  1 、concat 拼接字符
