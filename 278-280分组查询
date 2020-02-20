@@ -3,11 +3,11 @@
 说明：分组函数往往用于实现将一组数据进行统计计算，最终得到一个值，又称为绝活函数或统计函数
 
 分组函数清单：
-sum(字段名)：求和
-avg(字段名)：求平均值
-max(字段名)：求最大值
-min(字段名)：求最小值
-count(字段名)：计算非空字段值的个数
+sum(字段名)：求和 只处理数值型
+avg(字段名)：求平均值 只处理数值型
+max(字段名)：求最大值 可以处理任何数据类型
+min(字段名)：求最小值 可以处理任何数据类型
+count(字段名)：计算非空字段值的个数 可以处理任何数据类型
 */
 #案例1：查询员工信息表中，所有员工的工资和、工资平均值、最低工资、最高工资、有工资的个数
 SELECT
@@ -45,7 +45,7 @@ SELECT COUNT(DISTINCT department_id) FROM employees;
   
 #思考：每个部门的总工资，平均工资如何求
 SELECT SUM(salary) FROM employees WHERE department_id=30;
-SELECT SUM(salary) FROM employees WHERE department_id=40;
+SELECT AVG(salary) FROM employees WHERE department_id=40;
 ...
 #由分组查询实现：
 #先分组，再统计，所以分组函数一般搭配统计函数使用 由grooup by子句实现
@@ -61,6 +61,8 @@ where 分组前筛选
 group by 分组列表
 having 分组后筛选
 order by 排序列表;
+
+group by和having在oracle中用的比较少
 
 执行顺序：
 ①from子句
