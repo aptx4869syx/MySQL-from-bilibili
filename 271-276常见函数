@@ -10,38 +10,54 @@
 
 常见函数：
         字符函数————专门处理字符串
-            concat 连接
-            substr 截取字串
-            length 获取字节长度
-            char_length 获取字符个数
-            upper 变大写
-            lower 变小写
-            trim 去前后空格
-            left 左截取
-            right 右截取
-            lpad 左填充
-            rpad 右填充
-            instr 获取子串第一次出现的索引
-            strcmp 比较两个字符大小
+            concat(str1,str2,...) 拼接字符
+            substr(str,pos) 截取从pos开始的所有字串，起始索引从1开始
+            substr(str,pos,len) 截取len个从pos开始的字符，起始索引从1开始
+            length(str) 获取字节长度
+            char_length(str) 获取字符个数
+            upper(str) 变大写
+            lower(str) 变小写
+            trim(【substr from】str) 去前后指定字符，默认是去空格
+            left(str,len) 从左边截取指定len个数的字符
+            right(str,len) 从右边截取指定len个数的字符
+            lpad(str,substr,len) 左填充
+            rpad(str,substr,len) 右填充
+            instr(str,substr) 获取substr在str中第一次出现的索引
+            strcmp(str1,str2) 比较两个字符大小
         数学函数————专门处理数值型
-            abs 取绝对值
-            ceil 向上取整
-            floor 向下取整
-            truncate 截断
-            mod 取余
-            rand 随机数
+            abs(x) 取绝对值
+            ceil(x) 向上取整-屋顶
+            floor(x) 向下取整-地板
+            truncate(x,d) 截断，保留小数点后d位
+            round(x) 四舍五入
+            mod(x) 取余
+            rand(x) 随机数
         日期函数
-            CURDATE 当前日期
-            CURTIME 当前时间
-            NOW 当前日期和时间
-            YEAR 返回年
-            DATEDIFF 返回两个日期相差天数
-            DATE_FORMAT 将日期转换成字符
-            STR_TO_DATE 将字符转换成日期
-            MONTHNAME 以英文形式返回月
+            CURDATE() 当前日期
+            CURTIME() 当前时间
+            NOW() 当前日期和时间
+            YEAR(date) 返回年
+            DATEDIFF(date1,date2) 返回两个日期相差天数
+            DATE_FORMAT(date,格式) 将日期转换成字符
+            STR_TO_DATE(str,格式) 将字符转换成日期
+            MONTHNAME() 以英文形式返回月
         流程控制函数
-            IF
-            CASE
+            IF(条件，表达式1，表达式2) 如果条件成立，返回表达式1，否则返回表达式2
+            CASE表达式
+                -------
+                case 表达式
+                when 值1 then 结果1
+                when 值2 then 结果2
+                ...
+                【else 结果n】
+                end
+                -------
+                case 
+                when 条件1 then 结果1
+                when 条件2 then 结果2
+                ...
+                【else 结果n】
+                end
          其他函数
             version 当前数据库服务器的版本
             datebase 当前打开的数据库
