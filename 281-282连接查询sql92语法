@@ -41,6 +41,15 @@ WHERE beauty.boyfriend_id=boys.id;
     【having 分组后的筛选】
     【order by 字段排序】
 
+执行顺序：
+from 表名1 as 别名1,表名2 as "别名2",...
+where 等值连接的连接条件
+【and 筛选条件】
+【group by 字段分组】
+【having 分组后的筛选】
+select 查询列表
+【order by 字段排序】
+
 数学解释：
 连接实际采用笛卡尔乘积，但为了避免产生笛卡尔集造成数据冗余，我们一般都会加where作为连接条件
 这也是关系型数据库的特点，一般库和库之间可以找到关联关系，同时再加上筛选条件就可以极大简化总表
