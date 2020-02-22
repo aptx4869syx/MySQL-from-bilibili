@@ -1,6 +1,6 @@
 #进阶5：分组函数
  /*
-说明：分组函数往往用于实现将一组数据进行统计计算，最终得到一个值，又称为绝活函数或统计函数
+说明：分组函数往往用于实现将一组数据进行统计计算，最终得到一个值，又称为绝活函数或统计函数，自动忽略null值
 
 分组函数清单：
 sum(字段名)：求和 只处理数值型
@@ -55,7 +55,7 @@ SELECT department_id,SUM(salary) FROM employees GROUP BY department_id;
  #进阶6、分组查询
  /*
 语法：
-select 查询列表
+select 分组函数,分组的字段
 from 表名
 where 分组前筛选
 group by 分组列表
@@ -79,6 +79,7 @@ group by和having在oracle中用的比较少
 分组前筛选    原始表        where            group by前            
 分组后筛选    临时表        having           group by后
 where——group by——having
+③分组列表可以是单个字段，多个字段
 
 问题：分组函数做条件 一般用having连接 不可能用where 
  */
