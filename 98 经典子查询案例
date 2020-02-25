@@ -1,0 +1,147 @@
+#1.查询工资最低的员工信息
+SELECT *
+FROM employees
+WHERE salary=(
+SELECT MIN(salary) FROM employees);
+
+#2.查询平均工资最低的部门信息
+#通过排序分页子查询可查出最低工资，但部门编号理论上不一定唯一，不能直接使用
+#①查询最低工资---此处可以用min函数及排序分页两种方法实现
+SELECT MIN(s.ag)
+FROM(SELECT AVG(salary) ag FROM employees GROUP BY department_id) s;
+
+SELECT AVG(salary) ag FROM employees GROUP BY department_id 
+ORDER BY ag ASC LIMIT 1;
+#②查询平均工资等于最低工资的部门编号---此处结合①中2种结果都可以实现
+SELECT department_id FROM employees GROUP BY department_id
+HAVING AVG(salary)=(SELECT MIN(s.ag)
+FROM(SELECT AVG(salary) ag FROM employees GROUP BY department_id) s);
+
+
+#3.查询平均工资最高的部门信息和该部门的平均工资
+SELECT d.*, (SELECT AVG(salary)   
+                      FROM employees   
+                      WHERE department_id = d.department_id) "最高平均工资"  
+FROM departments d   
+WHERE d.department_id IN (   
+       SELECT department_id FROM employees   
+       GROUP BY department_id 
+       HAVING AVG(salary) =(   
+               SELECT AVG(salary) ag FROM employees   
+               GROUP BY department_id
+               ORDER BY ag DESC
+               LIMIT 1)   
+        );
+
+SELECT d.*
+FROM departments d
+JOIN (
+	SELECT AVG(salary) avgs,department_id
+	FROM employees
+	GROUP BY department_id
+)ad
+ON d.`department_id`=ad.department_id
+AND d.`department_id` IN(
+	SELECT department_id
+	FROM employees
+	GROUP BY department_id
+	HAVING AVG(salary)=(
+		SELECT AVG(salary) ag
+		FROM employees
+		GROUP BY department_id
+		ORDER BY AVG(salary) DESC
+		LIMIT 1
+		)
+);
+
+#4.查询平均工资最高的job信息
+#①查询job_id对应最高平均工资
+SELECT AVG (salary) ag
+FROM employees
+GROUP BY job_id
+ORDER BY ag DESC
+LIMIT 1;
+
+#②查询最高平均工资及对应的job_id
+SELECT j.*
+FROM jobs j
+WHERE job_id IN(
+	SELECT job_id
+	FROM employees
+	GROUP BY job_id
+	HAVING AVG(salary)=(
+		SELECT AVG(salary) ag
+		FROM employees
+		GROUP BY job_id
+		ORDER BY AVG(salary) DESC
+		LIMIT 1
+		)
+);
+
+#③连接查询
+SELECT j.*,MAX(aj.avgs)
+FROM jobs j
+JOIN (
+	SELECT AVG(salary) avgs,job_id
+	FROM employees
+	GROUP BY job_id
+)aj
+ON j.`job_id`=aj.job_id
+AND j.`job_id`IN(
+	SELECT job_id
+	FROM employees
+	GROUP BY job_id
+	HAVING AVG(salary)=(
+		SELECT AVG(salary) ag
+		FROM employees
+		GROUP BY job_id
+		ORDER BY AVG(salary) DESC
+		LIMIT 1
+		)
+);
+
+#5.查询平均工资高于公司平均工资的部门有哪些
+SELECT department_id
+FROM employees
+GROUP BY department_id
+HAVING AVG(salary)>(
+	SELECT AVG(salary) 
+	FROM employees
+);
+
+#6.查询出工资中所有manager的详细信息
+SELECT *
+FROM employees 
+WHERE employee_id IN (
+	SELECT DISTINCT manager_id
+	FROM employees
+);
+
+#7.各个部门中，最高工资中最低的那个部门的最低工资是多少
+SELECT MIN(salary),department_id
+FROM employees
+GROUP BY department_id
+HAVING MAX(salary) =(
+	SELECT MAX(salary) 
+	FROM employees
+	GROUP BY department_id
+	ORDER BY MAX(salary) ASC
+	LIMIT 1
+);
+
+#8.查询平均工资最高的部门的manager的详细信息
+SELECT *
+FROM employees
+GROUP BY manager_id
+HAVING `department_id` IN(
+	SELECT department_id
+	FROM employees
+	GROUP BY department_id
+	HAVING AVG(salary)=(
+		SELECT AVG(salary) ag
+		FROM employees
+		GROUP BY department_id
+		ORDER BY AVG(salary) DESC
+		LIMIT 1
+		)
+);
